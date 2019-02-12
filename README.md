@@ -1,4 +1,4 @@
-# Arctic Training Hands-on Materials
+# Arctic Training Hands-on Materials; this should work really well!
 
 This is a training repository from the Arctic Data Center training. 
 
