@@ -7,4 +7,6 @@ This is a training repository from the Arctic Data Center training.
 * Notes
 
 
-Making some changes here
+Making some changes here\
+
+another change
