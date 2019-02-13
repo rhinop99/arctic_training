@@ -15,3 +15,6 @@ add this hahaha
 ... hahahah...whatever i want yeah yeah yeah 
 
 I'm working on it
+
+* I want to measure rainfall
+* How much will it rain tomorrow?
