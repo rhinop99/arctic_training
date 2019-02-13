@@ -18,3 +18,4 @@ I'm working on it
 
 * I want to measure rainfall
 * How much will it rain tomorrow?
+    + Maybe an inch
