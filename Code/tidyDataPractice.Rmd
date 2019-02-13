@@ -1,0 +1,33 @@
+---
+title: "TidyData"
+author: "Ali Paulson"
+date: "February 13, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(tidyr)
+#Can use warning = FALSE, message = FALSE to suppress warnings in the html output
+```
+
+
+```{r data, echo = FALSE}
+catch <- read.csv("../salmondata/df35b.302.1.csv", stringsAsFactors = FALSE)
+
+regdefs <- read.csv("../salmondata/df35b.303.1.csv", stringsAsFactors = FALSE)
+
+
+```
+
+# Reformat Catch Data
+
+* Remove the "all" column
+* Create species column
+    + move from wide to long
+* General QA
+
+# Join the Region Definitions 
+
+# Miscellaneous functions
