@@ -129,10 +129,83 @@ $(document).ready(function () {
 </div>
 
 
+<p>The data we are using are from <a href="https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1">Mike Byerly. Alaska commercial salmon catches by management region (1886- 1997). Gulf of Alaska Data Portal. df35b.304.2.</a></p>
 <div id="reformat-catch-data" class="section level1">
 <h1>Reformat Catch Data</h1>
+<pre class="r"><code>head(catch_original)</code></pre>
+<pre><code>##   Region Year Chinook Sockeye Coho Pink Chum All notesRegCode
+## 1    SSE 1886       0       5    0    0    0   5             
+## 2    SSE 1887       0     155    0    0    0 155             
+## 3    SSE 1888       0     224   16    0    0 240             
+## 4    SSE 1889       0     182   11   92    0 285             
+## 5    SSE 1890       0     251   42    0    0 292             
+## 6    SSE 1891       0     274   24    0    0 298</code></pre>
+<p>Remove the <code>all</code> and <code>notesRegCode</code> columns</p>
+<p>Some people just remove columns by setting them to NULL, but this isn’t very clean/readable. The dplyr world makes things more readable, etc. So, we can use <strong>select()</strong> to remove columns.</p>
+<p>The pipe operator takes the output from one function and puts it into the input of the next function. &lt;- is kind of like “gets the value”, %&gt;% is like “gets passed on to/then”. Piping makes your workflow more legible, easier for others to understand.</p>
+<p>Ctrl + shift + m: pipe operature shortcut %&gt;%</p>
+<p>Need to explain why you don’t have to write in the dataframe as the first argument as select…pipe operator passes things into that first argument.</p>
+<p><strong>gather()</strong> collects things into key-value pairs</p>
 <ul>
-<li>Remove the “all” column</li>
+<li>key is the column names in wide format - key specifies what we want to call the new column of old column names</li>
+<li>value is the value in those columns - value is what we want to call those values in the new long dataframe</li>
+<li>gather() will turn all of your columns into these key-value pairs unless you tell it otherwise
+<ul>
+<li>can tell gather() what not to include (or what to include)
+<ul>
+<li>e.g. -Region, -Year</li>
+<li>or e.g. Chinook, Sockeye, Coho, Pink, Chum</li>
+</ul></li>
+</ul></li>
+</ul>
+<pre class="r"><code>catch_long &lt;- catch_original %&gt;% 
+  select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum)
+
+head(catch_long)</code></pre>
+<pre><code>##   Region Year Chinook Sockeye Coho Pink Chum
+## 1    SSE 1886       0       5    0    0    0
+## 2    SSE 1887       0     155    0    0    0
+## 3    SSE 1888       0     224   16    0    0
+## 4    SSE 1889       0     182   11   92    0
+## 5    SSE 1890       0     251   42    0    0
+## 6    SSE 1891       0     274   24    0    0</code></pre>
+<pre class="r"><code>#equivalent to
+# catch_longb &lt;- catch_original %&gt;% 
+#   select(-All, -notesRegCode)
+# head(catch_longb)
+
+#Now let's make it long
+catch_long &lt;- catch_original %&gt;% 
+  #Select desired columns
+  select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum) %&gt;% 
+  #Move from wide to long
+  gather(key = &quot;species&quot;, value = &quot;catch&quot;, -Region, -Year)
+
+head(catch_long)</code></pre>
+<pre><code>##   Region Year species catch
+## 1    SSE 1886 Chinook     0
+## 2    SSE 1887 Chinook     0
+## 3    SSE 1888 Chinook     0
+## 4    SSE 1889 Chinook     0
+## 5    SSE 1890 Chinook     0
+## 6    SSE 1891 Chinook     0</code></pre>
+<p>The opposite of <strong>gather()</strong> is <strong>spread()</strong>.</p>
+<ul>
+<li>key - the column names - this is the column that you want to turn into column names<br />
+</li>
+<li>value is the column with the values that you want the new df to have</li>
+</ul>
+<pre class="r"><code>catch_wide &lt;- catch_long %&gt;% 
+  spread(key = species, value = catch)
+head(catch_wide)</code></pre>
+<pre><code>##   Region Year Chinook Chum Coho Pink Sockeye
+## 1    ALU 1911       0    0    0    0       9
+## 2    ALU 1912       0    0    0    0       0
+## 3    ALU 1913       0    0    0    0       0
+## 4    ALU 1914       0    0    0    0       0
+## 5    ALU 1915       0    0    0    0       0
+## 6    ALU 1916       0    0    1  180      76</code></pre>
+<ul>
 <li>Create species column
 <ul>
 <li>move from wide to long</li>

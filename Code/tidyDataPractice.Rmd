@@ -13,17 +13,78 @@ library(tidyr)
 ```
 
 
+The data we are using are from [Mike Byerly. Alaska commercial salmon catches by management region (1886- 1997). Gulf of Alaska Data Portal. df35b.304.2.](https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1) This is from a PDF file, retrieved with OCR - optical character recognition. You can use this to get a computer to read a PDF. 
+
 ```{r data, echo = FALSE}
-catch <- read.csv("../salmondata/df35b.302.1.csv", stringsAsFactors = FALSE)
+#catch <- read.csv("../salmondata/df35b.302.1.csv", stringsAsFactors = FALSE)
 
-regdefs <- read.csv("../salmondata/df35b.303.1.csv", stringsAsFactors = FALSE)
+#regdefs <- read.csv("../salmondata/df35b.303.1.csv", stringsAsFactors = FALSE)
 
-
+#Can also just download these from the internet!
+catch_original <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1", method = "libcurl"), stringsAsFactors = FALSE)
 ```
 
 # Reformat Catch Data
 
-* Remove the "all" column
+```{r}
+head(catch_original)
+```
+
+Remove the `all` and `notesRegCode` columns
+
+Some people just remove columns by setting them to NULL, but this isn't very clean/readable.  The dplyr world makes things more readable, etc. So, we can use **select()** to remove columns. 
+
+The pipe operator takes the output from one function and puts it into the input of the next function. <- is kind of like "gets the value", %>% is like "gets passed on to/then". Piping makes your workflow more legible, easier for others to understand. 
+
+Ctrl + shift + m: pipe operature shortcut %>% 
+
+Need to explain why you don't have to write in the dataframe as the first argument as select...pipe operator passes things into that first argument. 
+
+**gather()** collects things into key-value pairs
+
+* key is the column names in wide format - key specifies what we want to call the new column of old column names
+* value is the value in those columns - value is what we want to call those values in the new long dataframe
+* gather() will turn all of your columns into these key-value pairs unless you tell it otherwise
+    + can tell gather() what not to include (or what to include)
+        + e.g. -Region, -Year
+        + or e.g. Chinook, Sockeye, Coho, Pink, Chum
+
+```{r}
+
+catch_long <- catch_original %>% 
+  select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum)
+
+head(catch_long)
+
+#equivalent to
+# catch_longb <- catch_original %>% 
+#   select(-All, -notesRegCode)
+# head(catch_longb)
+
+#Now let's make it long
+catch_long <- catch_original %>% 
+  #Select desired columns
+  select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum) %>% 
+  #Move from wide to long
+  gather(key = "species", value = "catch", -Region, -Year)
+
+head(catch_long)
+```
+
+
+The opposite of **gather()** is **spread()**. 
+
+* key - the column names - this is the column that you want to turn into column names  
+* value is the column with the values that you want the new df to have
+
+```{r}
+catch_wide <- catch_long %>% 
+  spread(key = species, value = catch)
+head(catch_wide)
+
+```
+
+
 * Create species column
     + move from wide to long
 * General QA
