@@ -1,0 +1,102 @@
+---
+title: "functions-tutorial"
+author: "Ali Paulson"
+date: "February 13, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Work with some data in degrees F
+
+- Convert to C
+
+By doing it this way, you can easily introduce errors
+```{r}
+airtemps <- c(212, 100, 32, 64, 0, -20)
+airtemps
+airtemp1 <- (airtemps - 32) *5/9
+airtemp1
+```
+
+
+# Write a function to convert to C
+
+You use the function() function to create a function. 
+
+* temp_fahr is the input
+* the code in between the braces will be run, and will be assigned the value fahr_to_celsius
+* you use return to return a value back...R's default is to return the last value in your function, so you should be explicit about what you want returned
+
+```{r}
+fahr_to_celsius <- function(temp_fahr) {
+  celsius <- (temp_fahr - 32) * 5/9
+  return(celsius)
+}
+
+
+fahr_to_celsius(32)
+fahr_to_celsius(78)
+celsius_temps <- fahr_to_celsius(airtemps) #Works like a vector function, too
+celsius_temps
+fahr_to_celsius
+
+```
+Can type function name (without parentheses) into the console to see the code behind a function. 
+
+Can provide defaults in your argument calls...
+
+
+```{r}
+fahr_to_celsius_default <- function(temp_fahr = 100) {
+  celsius <- (temp_fahr - 32) * 5/9
+  return(celsius)
+}
+
+
+fahr_to_celsius_default()
+fahr_to_celsius_default(32)
+
+```
+
+
+# Write a function to convert C to F
+
+
+```{r}
+celsius_to_fahr <- function(temp_C){
+  fahr <- (temp_C * 9/5)+32
+  return(fahr)
+}
+
+celsius_to_fahr(0)
+
+fahr_temps <- celsius_to_fahr(celsius_temps)
+fahr_temps
+setdiff(fahr_temps, airtemps)
+setdiff(airtemps, fahr_temps)
+fahr_temps == airtemps
+
+```
+
+# Show how to document functions
+
+You should document functions after you write them 
+
+* use a package called roxygen
+```{r}
+#' Converts numeric temperature data from degrees Fahrenheit to degrees Celsius
+#' 
+#' @param temp_fahr is the value in F to be converted to C
+#' @return celsius is the temperature value in C, converted from F
+
+fahr_to_celsius_default <- function(temp_fahr = 100) {
+  celsius <- (temp_fahr - 32) * 5/9
+  return(celsius)
+}
+
+
+```
+
