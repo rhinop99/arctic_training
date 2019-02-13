@@ -164,10 +164,71 @@ species_mean <- catch_clean %>%
 head(species_mean)
 ```
 
-
-
-* General QA
-
 # Join the Region Definitions 
+Let's join the region name together with the cleaned catch information
 
-# Miscellaneous functions
+We'll use a left join - we'll end up with same number of rows as left-hand df, and additional columns from the right hand df (excluding the key columns, which are already there).  
+
+If there were two different values for the key in table 2, it will return two rows for that information (so you'll end up with more rows than you expected). This means something might be wrong and you need to look it up.  
+
+
+First, bring in the [regional definitions csv]("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1""), from the same source data listed at the top. 
+
+```{r}
+region_defs <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1",
+                            method = "libcurl"),
+                        stringsAsFactors = FALSE) %>% 
+    select(code, mgmtArea)
+
+head(region_defs)
+```
+
+Now, let's practice the join. 
+
+* Initial join attempt didn't work because they don't have similar column names (e.g. region vs. Code). 
+    + Can set the variables to join on by using the by = ... argument
+    + can even set that Region = code using the by = ... command - haven't seen that before. 
+    + Can also set multiple key-value pairs using the by = ... command e.g.
+        + by = c("Region" = "Code", "Community" = "City")...region and community are from the first data frame, code and city are from the second data frame.  
+    + Can use antijoin() to check for non-matching sets, catch spelling errors, etc. 
+
+```{r}
+catch_joined <- left_join(catch_clean, region_defs, by = c("Region" = "code"))
+
+head(catch_joined)
+```
+
+
+# separate() and unite()
+
+* separate() will separate one column into multiple columns by splitting at some non-alpha numeric character (or by regular expressions)
+* unite() brings things together - opposite of separate
+
+
+ISO date: year-twodigitmonth-year...split by dashes, this is the preferred date format
+```{r}
+dates_df <- data.frame(date = c("5/24/1930",
+                                "5/25/1930",
+                                "5/26/1930",
+                                "5/27/1930",
+                                "5/28/1930"),
+                       stringsAsFactors = FALSE)
+
+dates_split <- dates_df %>% 
+  separate(date, into = c("month", "day", "year"),  sep = "/", remove = F)
+head(dates_split)
+
+dates_unite <- dates_split %>% 
+  unite(col = date_iso, year, month, day, sep = "-")
+head(dates_unite)
+```
+
+Can pad strings - and only strings that aren't already 2 digits. Can be helpful if May written in data as "5" instead of "05".  Use **str_pad()** function from stringr package. 
+
+```{r}
+library(stringr)
+
+month <- c("12", "5", "03", "4")
+str_pad(month, 2, side = "left", pad = "0")
+```
+
