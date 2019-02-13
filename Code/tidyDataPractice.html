@@ -129,7 +129,7 @@ $(document).ready(function () {
 </div>
 
 
-<p>The data we are using are from <a href="https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1">Mike Byerly. Alaska commercial salmon catches by management region (1886- 1997). Gulf of Alaska Data Portal. df35b.304.2.</a></p>
+<p>The data we are using are from <a href="https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1">Mike Byerly. Alaska commercial salmon catches by management region (1886- 1997). Gulf of Alaska Data Portal. df35b.304.2.</a> This is from a PDF file, retrieved with OCR - optical character recognition. You can use this to get a computer to read a PDF.</p>
 <div id="reformat-catch-data" class="section level1">
 <h1>Reformat Catch Data</h1>
 <pre class="r"><code>head(catch_original)</code></pre>
@@ -205,11 +205,68 @@ head(catch_wide)</code></pre>
 ## 4    ALU 1914       0    0    0    0       0
 ## 5    ALU 1915       0    0    0    0       0
 ## 6    ALU 1916       0    0    1  180      76</code></pre>
+</div>
+<div id="clean-up-our-data" class="section level1">
+<h1>Clean up our data</h1>
 <ul>
-<li>Create species column
+<li>rename catch to <code>catch_thousands</code></li>
+<li>create a new catch column in units <code>number_fish</code></li>
+<li>catch column needs to be changed to numeric</li>
+</ul>
+<p>If you chain together a ton of pipes without explaining them, it can be confusing for others. So, it’s a good idea to break up pipe operators into logical chunks.</p>
+<p>Function <strong>rename()</strong> allows you to easily change column names.</p>
+<p>Function <strong>mutate()</strong> allows you to add a new column to a dataframe, also allows you to change the structure of a column in a dataframe (e.g. change to numeric from character).</p>
+<p>We get an error when we try to change the catch_thousands column into numeric - sometimes this is okay, but you need to investigate the error messages to make sure nothing fishy is going on.</p>
+<pre class="r"><code>catch_clean &lt;- catch_long %&gt;% 
+  rename(catch_thousands = catch) %&gt;% 
+  mutate(catch_thousands = as.numeric(catch_thousands))</code></pre>
+<pre><code>## Warning in evalq(as.numeric(catch_thousands), &lt;environment&gt;): NAs
+## introduced by coercion</code></pre>
+<pre class="r"><code>  #Create a new column - doesn't work because there is something wrong in the catch_thousands column
+ # mutate(catch = catch_thousands * 1000)
+
+head(catch_clean)</code></pre>
+<pre><code>##   Region Year species catch_thousands
+## 1    SSE 1886 Chinook               0
+## 2    SSE 1887 Chinook               0
+## 3    SSE 1888 Chinook               0
+## 4    SSE 1889 Chinook               0
+## 5    SSE 1890 Chinook               0
+## 6    SSE 1891 Chinook               0</code></pre>
+<p>Look for where as.numeric failed</p>
+<p>There is an “I” (uppercase i) in the dataframe. Go back to the original data source and double check what this value should be. Here, it should actually be a 1 (one), but the OCR thought it was an I.</p>
+<p>We need to fix this reproducibly, by explaining the error and what we did to fix it.</p>
+<pre class="r"><code>test &lt;- as.numeric(catch_long$catch)</code></pre>
+<pre><code>## Warning: NAs introduced by coercion</code></pre>
+<pre class="r"><code>i &lt;- which(is.na(test))
+#Same as 
+#i &lt;- which(is.na(test)==TRUE)
+
+#Can see that the 401st row is the problem
+catch_long[i, ]</code></pre>
+<pre><code>##     Region Year species catch
+## 401    GSE 1955 Chinook     I</code></pre>
+<p>Fix the problem!</p>
+<p>Use an <strong>if_else</strong> function to turn the I into a 1.</p>
+<pre class="r"><code>catch_clean &lt;- catch_long %&gt;% 
+  rename(catch_thousands = catch) %&gt;% 
+  mutate(catch_thousands = ifelse(catch_thousands == &quot;I&quot;, 1, catch_thousands)) %&gt;% 
+  #Same as this with the %in% operator: 
+  #mutate(catch_thousands = ifelse(catch_thousands == %in% c(&quot;I&quot;), 1, catch_thousands)) %&gt;% 
+  mutate(catch_thousands = as.numeric(catch_thousands)) %&gt;% 
+  mutate(catch = catch_thousands * 1000) %&gt;% 
+  #Don't want the catch_thousands column any more: 
+  select(-catch_thousands)
+
+head(catch_clean)</code></pre>
+<pre><code>##   Region Year species catch
+## 1    SSE 1886 Chinook     0
+## 2    SSE 1887 Chinook     0
+## 3    SSE 1888 Chinook     0
+## 4    SSE 1889 Chinook     0
+## 5    SSE 1890 Chinook     0
+## 6    SSE 1891 Chinook     0</code></pre>
 <ul>
-<li>move from wide to long</li>
-</ul></li>
 <li>General QA</li>
 </ul>
 </div>

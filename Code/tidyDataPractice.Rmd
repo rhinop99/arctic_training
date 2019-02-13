@@ -85,8 +85,83 @@ head(catch_wide)
 ```
 
 
-* Create species column
-    + move from wide to long
+#Clean up our data
+
+* rename catch to `catch_thousands`
+* create a new catch column in units `number_fish`
+* catch column needs to be changed to numeric
+
+If you chain together a ton of pipes without explaining them, it can be confusing for others.  So, it's a good idea to break up pipe operators into logical chunks. 
+
+Function **rename()** allows you to easily change column names. 
+
+Function **mutate()** allows you to add a new column to a dataframe, also allows you to change the structure of a column in a dataframe (e.g. change to numeric from character). 
+
+We get an error when we try to change the catch_thousands column into numeric - sometimes this is okay, but you need to investigate the error messages to make sure nothing fishy is going on. 
+
+```{r}
+catch_clean <- catch_long %>% 
+  rename(catch_thousands = catch) %>% 
+  mutate(catch_thousands = as.numeric(catch_thousands))
+  #Create a new column - doesn't work because there is something wrong in the catch_thousands column
+ # mutate(catch = catch_thousands * 1000)
+
+head(catch_clean)
+```
+ 
+ Look for where as.numeric failed
+ 
+There is an "I" (uppercase i) in the dataframe. Go back to the original data source and double check what this value should be.  Here, it should actually be a 1 (one), but the OCR thought it was an I. 
+
+We need to fix this reproducibly, by explaining the error and what we did to fix it. 
+
+```{r}
+test <- as.numeric(catch_long$catch)
+i <- which(is.na(test))
+#Same as 
+#i <- which(is.na(test)==TRUE)
+
+#Can see that the 401st row is the problem
+catch_long[i, ]
+
+
+```
+
+
+Fix the problem!
+
+Use an **if_else** function to turn the I into a 1.  
+
+```{r}
+catch_clean <- catch_long %>% 
+  rename(catch_thousands = catch) %>% 
+  mutate(catch_thousands = ifelse(catch_thousands == "I", 1, catch_thousands)) %>% 
+  #Same as this with the %in% operator: 
+  #mutate(catch_thousands = ifelse(catch_thousands == %in% c("I"), 1, catch_thousands)) %>% 
+  mutate(catch_thousands = as.numeric(catch_thousands)) %>% 
+  mutate(catch = catch_thousands * 1000) %>% 
+  #Don't want the catch_thousands column any more: 
+  select(-catch_thousands)
+
+head(catch_clean)
+```
+
+
+#Split-apply-combine
+
+Calculate summary metrics, e.g. total or mean catch by region. Calculate mean catch by species. 
+
+```{r}
+species_mean <- catch_clean %>% 
+  group_by(species, Region) %>% 
+  summarize(catch_mean <- mean(catch), 
+            num_obs <- n())
+
+head(species_mean)
+```
+
+
+
 * General QA
 
 # Join the Region Definitions 
