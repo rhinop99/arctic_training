@@ -168,7 +168,7 @@ celsius_temps</code></pre>
 ##   celsius &lt;- (temp_fahr - 32) * 5/9
 ##   return(celsius)
 ## }
-## &lt;bytecode: 0x0000000013439648&gt;</code></pre>
+## &lt;bytecode: 0x0000000013151718&gt;</code></pre>
 <p>Can type function name (without parentheses) into the console to see the code behind a function.</p>
 <p>Can provide defaults in your argument calls…</p>
 <pre class="r"><code>fahr_to_celsius_default &lt;- function(temp_fahr = 100) {
@@ -212,10 +212,23 @@ fahr_temps</code></pre>
 #' @param temp_fahr is the value in F to be converted to C
 #' @return celsius is the temperature value in C, converted from F
 
-fahr_to_celsius_default &lt;- function(temp_fahr = 100) {
+fahr_to_celsius &lt;- function(temp_fahr) {
   celsius &lt;- (temp_fahr - 32) * 5/9
   return(celsius)
 }</code></pre>
+</div>
+<div id="can-create-an-r-code-not-markdown-that-contains-all-of-the-functions-that-you-might-want-to-use-in-different-codes.-then-you-can-source-that-file-be-able-to-use-those-functions-in-your-code.-you-can-also-build-your-own-package-that-holds-all-of-your-functions." class="section level1">
+<h1>Can create an R Code (not markdown) that contains all of the functions that you might want to use in different codes. Then, you can <strong>source()</strong> that file be able to use those functions in your code. You can also build your own package that holds all of your functions.</h1>
+<p>I’ve created an R code where I included the two functions (annotated with a new to distinguish from above). Then, I will source this.</p>
+<pre class="r"><code>source(&quot;../Code/conversions.R&quot;)
+airtemps</code></pre>
+<pre><code>## [1] 212 100  32  64   0 -20</code></pre>
+<pre class="r"><code>a &lt;- new_fahr_to_celsius(airtemps)
+a</code></pre>
+<pre><code>## [1] 100.00000  37.77778   0.00000  17.77778 -17.77778 -28.88889</code></pre>
+<pre class="r"><code>new_celsius_to_fahr(a)</code></pre>
+<pre><code>## [1] 212 100  32  64   0 -20</code></pre>
+<p>Now, when you have a whole bunch of functions, you have to decide where to store them in your file system. Tomorrow, we will talk about putting these functions together into a package, so that you can find them wherever you are.</p>
 </div>
 
 

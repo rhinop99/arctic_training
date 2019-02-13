@@ -92,11 +92,26 @@ You should document functions after you write them
 #' @param temp_fahr is the value in F to be converted to C
 #' @return celsius is the temperature value in C, converted from F
 
-fahr_to_celsius_default <- function(temp_fahr = 100) {
+fahr_to_celsius <- function(temp_fahr) {
   celsius <- (temp_fahr - 32) * 5/9
   return(celsius)
 }
 
 
 ```
+
+#Can create an R Code (not markdown) that contains all of the functions that you might want to use in different codes.  Then, you can **source()** that file be able to use those functions in your code. You can also build your own package that holds all of your functions. 
+
+I've created an R code where I included the two functions (annotated with a new to distinguish from above). Then, I will source this. 
+
+```{r}
+source("../Code/conversions.R")
+airtemps
+a <- new_fahr_to_celsius(airtemps)
+a
+new_celsius_to_fahr(a)
+```
+
+Now, when you have a whole bunch of functions, you have to decide where to store them in your file system.  Tomorrow, we will talk about putting these functions together into a package, so that you can find them wherever you are. 
+
 
