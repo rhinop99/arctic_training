@@ -9,7 +9,7 @@ This is a training repository from the Arctic Data Center training.
 
 Making some changes here, now I might create a merge conflict, but I don't think it's a big deal 
 
-another change
+another change, I want to see what happens
 
 add this hahaha 
 ... hahahah...whatever i want yeah yeah yeah 
