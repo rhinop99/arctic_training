@@ -266,6 +266,30 @@ head(catch_clean)</code></pre>
 ## 4    SSE 1889 Chinook     0
 ## 5    SSE 1890 Chinook     0
 ## 6    SSE 1891 Chinook     0</code></pre>
+</div>
+<div id="split-apply-combine" class="section level1">
+<h1>Split-apply-combine</h1>
+<p>Calculate summary metrics, e.g. total or mean catch by region. Calculate mean catch by species.</p>
+<pre class="r"><code>species_mean &lt;- catch_clean %&gt;% 
+  group_by(species, Year) %&gt;% 
+  summarize(catch_mean = mean(catch), 
+            num_obs = n()) %&gt;% 
+  #Can rearrange the columns: 
+  arrange(-Year) %&gt;% 
+  #Or filter options
+  filter(Year &gt;= 1990)
+
+head(species_mean)</code></pre>
+<pre><code>## # A tibble: 6 x 4
+## # Groups:   species [5]
+##   species  Year catch_mean num_obs
+##   &lt;chr&gt;   &lt;int&gt;      &lt;dbl&gt;   &lt;int&gt;
+## 1 Chinook  1997     36533.      15
+## 2 Chum     1997   1063200       15
+## 3 Coho     1997    210333.      15
+## 4 Pink     1997   4797133.      15
+## 5 Sockeye  1997   2072400       15
+## 6 Chinook  1996     32000       17</code></pre>
 <ul>
 <li>General QA</li>
 </ul>

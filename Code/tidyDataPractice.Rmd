@@ -153,9 +153,13 @@ Calculate summary metrics, e.g. total or mean catch by region. Calculate mean ca
 
 ```{r}
 species_mean <- catch_clean %>% 
-  group_by(species, Region) %>% 
-  summarize(catch_mean <- mean(catch), 
-            num_obs <- n())
+  group_by(species, Year) %>% 
+  summarize(catch_mean = mean(catch), 
+            num_obs = n()) %>% 
+  #Can rearrange the columns: 
+  arrange(-Year) %>% 
+  #Or filter options
+  filter(Year >= 1990)
 
 head(species_mean)
 ```
