@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Data Visualization"
 author: "Ali Paulson"
 date: "February 14, 2019"
 output: html_document
@@ -7,24 +7,87 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 ```
 
-## R Markdown
+The data we are using is from [Alaska Department of Fish and Game, Division of Commercial Fisheries. 2017. Daily salmon escapement counts from the OceanAK database, Alaska, 1921-2017. Knowledge Network for Biocomplexity. doi:10.5063/F1S46Q6M.]("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e")
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+#Reformat the data for plotting
+```{r}
+salmon <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e", method = "libcurl"), stringsAsFactors = F)
 
-```{r cars}
-summary(cars)
+head(salmon)
 ```
 
-## Including Plots
+* Calculate annual escapment by species and regoin
+    + `separate`
+    + `group_by`
+    + `summarize` using `sum` function
 
-You can also embed plots, for example:
+* filter for just Pacific salmon species (Sockeye, Chinook, Coho, Pink, Chum)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+annual_esc <- salmon %>% 
+  separate(sampleDate, into = c("year", "month", "day"), sep = "-") %>% 
+  group_by(year, SASAP.Region, Species) %>% 
+  summarize(escapement = sum(DailyCount)) %>% 
+  filter(Species %in% c("Sockeye", "Chinook", "Coho", "Pink", "Chum")) %>% 
+  ungroup() %>% 
+  #coerce year to numeric type: 
+  mutate(year = as.numeric(year))
+
+head(annual_esc)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+#Generate some static plots
+
+```{r}
+#Better practice to put your mapping in the ggplot call rather than the geom call, unless you are trying to map different parameters on the same plot
+
+ggplot(annual_esc, mapping = aes(x = Species, y = escapement))+
+  geom_col(fill = "blue")
+
+#Check out other color palettes with RColorBrewer
+
+#What if you do want to map something with the fill aesthetic?
+ggplot(annual_esc, mapping = aes(x = Species, y = escapement, fill = SASAP.Region))+
+  scale_fill_brewer(palette = 1)+ #Can choose different palettes for the fill
+  geom_col()
+
+```
+
+
+What if we just wanted to plot the Kodiak escapement?
+
+```{r}
+annual_esc %>% 
+  filter(SASAP.Region == "Kodiak") %>% 
+  ggplot(aes(x = year, y = escapement, color = Species))+
+  geom_line()+
+  geom_point()+
+  ggtitle("Kodiak Salmon Escapement")+
+  theme_test() + #Can use different ggplot themes to make things prettier
+  theme(legend.position = "bottom", legend.title = element_blank())
+
+#These theme calls for ggplot can get really long, but you can save your theme function calls to an object: 
+
+my_theme = theme_test()+
+  theme(legend.position = "Bottom", legend.title = element_blank())
+
+#This makes your code more dry, less repetition, easier to read. 
+
+annual_esc %>% 
+  filter(SASAP.Region == "Kodiak") %>% 
+  ggplot(aes(x = year, y = escapement, color = Species))+
+  geom_line()+
+  geom_point()+
+  ggtitle("Kodiak Salmon Escapement")+
+  my_theme #Add in the mytheme object!
+
+```
+
+#Generate an interactive map
