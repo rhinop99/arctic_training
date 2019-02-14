@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(scales)
 ```
 
 The data we are using is from [Alaska Department of Fish and Game, Division of Commercial Fisheries. 2017. Daily salmon escapement counts from the OceanAK database, Alaska, 1921-2017. Knowledge Network for Biocomplexity. doi:10.5063/F1S46Q6M.]("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e")
@@ -79,15 +80,43 @@ my_theme = theme_test()+
   theme(legend.position = "Bottom", legend.title = element_blank())
 
 #This makes your code more dry, less repetition, easier to read. 
+#You want to avoid calling theme twice though - as you can easily overwrite some of the things that you set as your theme - so if you have a theme() in your my_theme, you might overwrite things - just be careful. 
+#Use scale package to fix up the axis labels
 
 annual_esc %>% 
   filter(SASAP.Region == "Kodiak") %>% 
   ggplot(aes(x = year, y = escapement, color = Species))+
   geom_line()+
   geom_point()+
+  scale_y_continuous(labels = comma)+
   ggtitle("Kodiak Salmon Escapement")+
+  xlab("Year") +
+  ylab("Escapement (num of fish)") +
   my_theme #Add in the mytheme object!
 
 ```
 
+Let's make multiple plots, one for each region. 
+
+```{r, fig.width=7, fig.height = 8}
+
+p <- ggplot(annual_esc, aes(x = year, y = escapement, color = Species))+
+  geom_line()+
+  geom_point()+
+  scale_y_continuous(labels = comma)+
+  facet_wrap(~SASAP.Region, scales = "free_y", ncol =2)+
+  ggtitle("Kodiak Salmon Escapement")+
+  xlab("Year") +
+  ylab("Escapement (num of fish)") +
+  my_theme #Add in the mytheme object!
+
+p
+ggsave("figures/regional_escapement.png", 
+       plot = p, width = 7, height = 8, units = "in")
+```
+
+
+Can also turn some parts of R chunks on or off
+
 #Generate an interactive map
+
