@@ -11,6 +11,8 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(scales)
+library(leaflet)
+library(DT)
 ```
 
 The data we are using is from [Alaska Department of Fish and Game, Division of Commercial Fisheries. 2017. Daily salmon escapement counts from the OceanAK database, Alaska, 1921-2017. Knowledge Network for Biocomplexity. doi:10.5063/F1S46Q6M.]("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e")
@@ -118,5 +120,41 @@ ggsave("figures/regional_escapement.png",
 
 Can also turn some parts of R chunks on or off
 
-#Generate an interactive map
 
+
+#Generate an interactive map using leaflet
+
+Map the sampling locations for escapement. Starting back with the unsummarized data. 
+
+* Find distinct lat/long/location combinations, using the `distinct`
+* the `drop_na` function removes whole rows that contain an NA anywhere - could be dangerous, so be careful it's doing what you think. 
+
+```{r, echo = FALSE}
+locations <- salmon %>% 
+  distinct(Location, Latitude, Longitude) %>%  #pass this function the variables that you want it to pull distinct values from
+  drop_na()
+
+head(locations)
+
+datatable(locations)
+```
+
+Let's make a map!
+
+* use pipes with the leaflet package, rather than plus signs
+* Leaflet has a ton of functionality - can create an html block within the popups, can put in plots/hyperlinks into the popups
+* This isn't greaet for developing static maps - a new package called sf  - this integrates with ggplot2 for mapping vector files.  
+* Can create custom markers in leaflet as well. 
+
+```{r}
+leaflet(locations) %>% 
+  addTiles() %>% #Can change projection, but will have to use different tiles - default tiles use mercator
+  addMarkers(lng = ~Longitude, lat = ~Latitude, popup = ~Location)
+```
+
+
+If you want to add breaks to your html output: 
+adfljsa
+
+<br/>
+asdflkj
